@@ -1,140 +1,75 @@
-let axios = require("axios")
-let cheerio = require("cheerio")
+/**
+ * 2018/8/23 下午11:04
+ */
 
-let fs = require("fs-extra")
-let http = require('http')
-let path = require('path')
-
-let config = {
-    index: "http://www.fswangli.com.cn/",
-    hostname: "http://www.fswangli.com.cn/"
-};
-
-// 保存已获取的资源
-let cache = [];
+let cheerio = require('cheerio')
+let apiModel = require('./http')
+let DB = require('./db/index')
 
 class Spider {
-    constructor() {
+    constructor(config) {
+        let {db} = config
+
+        this.config = config
+
+        this.db = new DB(db)
     }
 
-    saveFile(file, content, encoding = 'utf-8', cb = null) {
-        let root = './tmp/'
-        let filename = file
+    start() {
+        this.getPageHtml().then(html => {
+            let result = this.parse(html)
+            let data = this.handleResult(result)
 
-        // 去除域名，保留站点根目录
-        if (/https?:\/\//.test(file)) {
-            let HOSTLENGTH = config.hostname.length;
-            filename = file.substr(HOSTLENGTH);
-
-            if (filename === "") {
-                filename = "index.html";
-            }
-        }
-        filename = root + filename
-
-        let fileObj = path.parse(filename)
-        let {dir} = fileObj
-
-        fs.ensureDir(dir).then((res) => {
-            fs.writeFile(filename, content, encoding, function (err) {
-                if (err) throw err
-                if (typeof cb === 'function') {
-                    cb(err)
-                }
-
-                console.log(`====write ${filename} success====`)
-                cache[filename] = true;
-            });
-        }).catch(err => {
-            if (err) throw err;
+            this.save(data)
         })
     }
 
-    // 启动
-    start() {
-        let startIndex = config.index
-        axios.get(startIndex).then(res => {
-            let data = res.data;
-            this.saveFile(startIndex, data, 'utf-8',)
-
-            let resource = this.getPageResource(data);
-            resource.forEach(val => {
-                let {src, encoding} = val;
-                if (!cache[src]) {
-                    this.getSource(src, encoding);
-                }
-            });
-        });
+    getPageHtml() {
+        let {url} = this.config
+        return apiModel.getPageContent(url)
     }
 
-    getSource(src, encoding = "utf-8") {
-        // 补全相对路径
-        if (!/https?:\/\//.test(src)) {
-            src = config.hostname + src;
-        }
+    parse(html) {
+        let $ = cheerio.load(html);
+        let strategy = this.getStrategy()
 
-        // 获取相关资源
-        http.get(encodeURI(src), (res) => {
-            let pageData = "";
-            res.setEncoding(encoding);
+        let result = []
+        strategy.forEach(strat => {
+            let {selector, parse} = strat
+            let $dom = $(selector)
 
-            res.on("error", function (errget) {
-                console.log("Eh, It's wrong");
-            });
-            res.on("data", function (chunk) {
-                pageData += chunk;
-            });
+            if (typeof parse === 'function') {
+                $dom.each(function () {
+                    let $this = $(this)
+                    let res = parse($this)
+                    result.push(res)
+                })
+            }
+        })
 
-            res.on("end", () => {
-                this.saveFile(src, pageData, encoding)
-            });
-        });
+        return result
     }
 
-    getPageResource(pageData) {
-        let resource = [];
-        let $ = cheerio.load(pageData);
-
-        // 获取页面资源
-        $("link, script, img").each(function () {
-            let src = "";
-            let encoding = "utf-8";
-            let tagName = $(this).prop("tagName");
-
-            switch (tagName) {
-                case "LINK":
-                    src = $(this).attr("href");
-                    break;
-                case "SCRIPT":
-                    src = $(this).attr("src");
-                    break;
-                case "IMG":
-                    src = $(this).attr("src");
-                    encoding = "binary";
-                    break;
-                default:
-                    console.log("bug~");
+    handleResult(data) {
+        // 过滤掉异常的asin值
+        let result = []
+        data.forEach((item) => {
+            item = item.trim()
+            if (item.length) {
+                result.push(item)
             }
+        })
+        return result
+    }
 
-            if (src) {
-                if (/^\.\//.test(src)) {
-                    src = src.replace(/\.\//, "");
-                }
-                if (resource.indexOf(src) == -1) {
-                    resource.push({
-                        src: src,
-                        encoding: encoding,
-                        type: tagName
-                    });
-                }
-            }
-        });
+    save(data) {
+        this.db.save(data)
+    }
 
-        return resource
+    getStrategy() {
+        let {strategy} = this.config
+        return strategy || []
     }
 }
 
-
-let spider = new Spider()
-
-spider.start()
+module.exports = Spider

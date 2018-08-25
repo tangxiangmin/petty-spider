@@ -8,9 +8,11 @@
     "cheerio": "^1.0.0-rc.2",
     "fs-extra": "^6.0.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "^4.1.2"
+  },
   "scripts": {
-    "start": "node src/spider.js"
+    "start": "node ./index.js"
   },
   "keywords": [],
   "author": "",
