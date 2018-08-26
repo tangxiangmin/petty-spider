@@ -5,13 +5,24 @@
 let axios = require('axios')
 let fs = require('fs-extra')
 
-let isMock = true
+let auth = require('./auth')
 
+axios.interceptors.request.use(
+    config => {
+        return auth.decorate(config)
+        return config;
+    },
+    err => {
+        return Promise.reject(err);
+    }
+);
+
+let isMock = true
 module.exports = {
     getPageContent(url) {
-        if(isMock){
+        if (isMock) {
             return fs.readFile('./mock/qiushi.html', 'utf-8')
-        }else {
+        } else {
             return axios.get(url).then(res => res.data)
         }
     }

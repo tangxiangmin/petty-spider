@@ -4,10 +4,11 @@
  */
 
 let File = require('./file')
+let util = require('../util')
 
 class DB {
     constructor(opt) {
-        let {type, config} = opt
+        let {type, config, format} = opt
 
         this.type = type
         this.config = config
@@ -33,8 +34,20 @@ class DB {
         }
     }
 
+    // 格式化数据
+    formatData(data) {
+        let {format} = this.config
+        if (util.isFunc(format)) {
+            return format(data)
+        } else {
+            return data
+        }
+    }
+
     save(data) {
-        this.engine.save(data)
+        let content = this.formatData(data)
+
+        this.engine.save(content)
     }
 }
 

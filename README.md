@@ -9,6 +9,6 @@ mini-spider
 * [ ] 并发请求、消息队列、自动登录
 
 ## 使用
+// todo 暂时参考index.js
 ```
-let miniSpider = 
 ```

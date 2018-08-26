@@ -3,16 +3,31 @@
  */
 
 let cheerio = require('cheerio')
-let apiModel = require('./http')
+let util = require('./util')
+let http = require('./http')
 let DB = require('./db/index')
 
 class Spider {
     constructor(config) {
-        let {db} = config
+
+        this.setDefaultConfig(config)
 
         this.config = config
+        this.db = new DB(config.db)
+    }
 
-        this.db = new DB(db)
+    setDefaultConfig(config) {
+        let {filter} = config
+
+        // 默认过滤函数
+        let defaultFilter = _ => {
+            return true
+        }
+
+        if (!util.isFunc(filter)) {
+            config.filter = defaultFilter
+        }
+        return config
     }
 
     start() {
@@ -26,7 +41,7 @@ class Spider {
 
     getPageHtml() {
         let {url} = this.config
-        return apiModel.getPageContent(url)
+        return http.getPageContent(url)
     }
 
     parse(html) {
@@ -51,11 +66,10 @@ class Spider {
     }
 
     handleResult(data) {
-        // 过滤掉异常的asin值
+        let {filter} = this.config
         let result = []
         data.forEach((item) => {
-            item = item.trim()
-            if (item.length) {
+            if (filter(item)) {
                 result.push(item)
             }
         })
