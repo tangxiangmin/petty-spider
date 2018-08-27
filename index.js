@@ -36,13 +36,15 @@ let fileDb = {
         },
     },
 }
+
 let mongoDb = {
     type: 'mongo',
     config: {
         host: 'mongodb://localhost/shymean',
+        document: 'joke',
         schema: {
             content: String
-        }
+        },
     }
 }
 

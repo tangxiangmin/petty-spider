@@ -6,9 +6,10 @@ const mongoose = require('mongoose');
 
 class Mogno {
     constructor(config) {
-        let {schema, host} = config
+        let {schema, host, document} = config
         this.schema = schema
         this.host = host
+        this.document = document
 
         this.initConnect()
         this.model = this.getModel()
@@ -31,7 +32,7 @@ class Mogno {
         const Schema = mongoose.Schema;
 
         const schema = new Schema(this.schema)
-        return mongoose.model('documents', schema)
+        return mongoose.model(this.document, schema)
     }
 
     save(data) {
