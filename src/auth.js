@@ -3,9 +3,24 @@
  * 处理登录鉴权的逻辑
  */
 
-module.exports = {
-    decorate(config) {
-        config.header['X-test-info'] = 'test'
-        return config
+
+class Auth {
+    constructor(config) {
+        this.config = config
+    }
+
+    getLoginConfig(axiosRequestConfig) {
+        let config = this.config
+        axiosRequestConfig.header['X-test-info'] = 'test'
+
+        return axiosRequestConfig
+    }
+
+    login() {
+        let loginConfig = this.getLoginConfig()
+
+        return Promise.resolve(true)
     }
 }
+
+module.exports = Auth

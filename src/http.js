@@ -5,15 +5,14 @@
 let axios = require('axios')
 let fs = require('fs-extra')
 
-let auth = require('./auth')
-
 axios.interceptors.request.use(
     config => {
-        return auth.decorate(config)
-        return config;
+        // return auth.decorate(config)
+        // todo 注入登录账号的信息
+        return config
     },
     err => {
-        return Promise.reject(err);
+        return Promise.reject(err)
     }
 );
 

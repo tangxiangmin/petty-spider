@@ -1,9 +1,10 @@
 /**
  * 2018/8/25 下午9:05
  */
+let path = require('path')
 
 let Spider = require('./src/spider')
-let path = require('path')
+let DB = require('./src/db/index')
 
 let sp = new Spider({
     url: 'https://www.qiushibaike.com/',
@@ -24,16 +25,28 @@ let sp = new Spider({
         result.content = content
         return content.length > 5
     },
-    // 指定存储类型
-    db: {
-        type: 'file',
-        config: {
-            dist: path.resolve(__dirname, './tmp/1.json'),
-            format(data) {
-                return JSON.stringify(data)
-            },
-        },
-    },
 })
 
-sp.start()
+let fileDb = {
+    type: 'file', // 指定存储类型
+    config: {
+        dist: path.resolve(__dirname, './tmp/1.json'),
+        format(data) {
+            return JSON.stringify(data)
+        },
+    },
+}
+let mongoDb = {
+    type: 'mongo',
+    config: {
+        host: 'mongodb://localhost/shymean',
+        schema: {
+            content: String
+        }
+    }
+}
+
+let db = new DB(mongoDb)
+sp.start().then(data => {
+    db.save(data)
+})

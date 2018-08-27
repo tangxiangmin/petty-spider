@@ -4,6 +4,8 @@
  */
 
 let File = require('./file')
+let Mongo = require('./mongo')
+
 let util = require('../util')
 
 class DB {
@@ -25,6 +27,8 @@ class DB {
 
         if (type === 'file') {
             Engine = File
+        } else if (type === 'mongo') {
+            Engine = Mongo
         }
 
         if (Engine) {

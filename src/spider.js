@@ -1,19 +1,16 @@
 /**
  * 2018/8/23 下午11:04
+ * 解析页面逻辑
  */
 
 let cheerio = require('cheerio')
 let util = require('./util')
 let http = require('./http')
-let DB = require('./db/index')
 
 class Spider {
     constructor(config) {
-
         this.setDefaultConfig(config)
-
         this.config = config
-        this.db = new DB(config.db)
     }
 
     setDefaultConfig(config) {
@@ -31,11 +28,10 @@ class Spider {
     }
 
     start() {
-        this.getPageHtml().then(html => {
+        return this.getPageHtml().then(html => {
             let result = this.parse(html)
             let data = this.handleResult(result)
-
-            this.save(data)
+            return data
         })
     }
 
@@ -74,10 +70,6 @@ class Spider {
             }
         })
         return result
-    }
-
-    save(data) {
-        this.db.save(data)
     }
 
     getStrategy() {
