@@ -53,7 +53,13 @@ class Spider {
                 $dom.each(function () {
                     let $this = $(this)
                     let res = parse($this)
-                    result.push(res)
+                    
+                    // 如果在解析函数中对数据进行拆分，则拼接数组
+                    if (Array.isArray(res)) {
+                        result = result.concat(res)
+                    } else {
+                        result.push(res)
+                    }
                 })
             }
         })

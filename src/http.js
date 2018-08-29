@@ -20,9 +20,14 @@ let isMock = true
 module.exports = {
     getPageContent(url) {
         if (isMock) {
-            return fs.readFile('./mock/qiushi.html', 'utf-8')
+            return fs.readFile('./mock/qiushi2.html', 'utf-8')
         } else {
-            return axios.get(url).then(res => res.data)
+            return axios.get(url).then(res => {
+                let html = res.data
+                // console.log(html)
+                // fs.writeFile('./mock/qiushi2.html', html, 'utf-8')
+                return html
+            })
         }
     }
 }

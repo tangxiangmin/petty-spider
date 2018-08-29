@@ -1,4 +1,4 @@
-mini-spider
+petty-spider
 ===
 
 一个精简的爬虫工具，满足日常的爬取需求
