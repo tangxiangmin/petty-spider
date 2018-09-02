@@ -2,35 +2,43 @@
  * 2018/8/25 下午9:05
  */
 let path = require('path')
+let log = require('./src/log')
 
 let Spider = require('./src/spider')
-let DB = require('./src/db/index')
+let DB = require('./src/db')
 let factory = require('./src/urlFactory')
-let log = require('./src/log')
+let Strategy = require('./src/strategy')
+
+let urlStrategy = new Strategy()
+
+// 模拟url
+function addQiushiUrl() {
+    for (let i = 0; i < 13; ++i) {
+        let url = `https://www.qiushibaike.com/hot/page/${i}/`
+        factory.addUrl(url)
+    }
+
+    for (let i = 0; i < 13; ++i) {
+        let url = `https://www.qiushibaike.com/text/page/${i}/`
+        factory.addUrl(url)
+    }
+
+    for (let i = 1; i < 13; ++i) {
+        let url = `https://www.qiushibaike.com/8hr/page/${i}/`
+        factory.addUrl(url)
+    }
+}
+
+addQiushiUrl()
 
 let app = {
     count: 0,
     init(url) {
+        let strategy = urlStrategy.getPageStrategy(url)
         let sp = new Spider({
             url,
             // 单个页面的爬取区域
-            strategy: [{
-                selector: '.article .contentHerf',
-                parse($dom) {
-                    // 这里处理对应的数据格式
-                    return {
-                        content: $dom.text()
-                    }
-                },
-            }, {
-                selector: '.tiezi .text',
-                parse($dom) {
-                    // 这里处理对应的数据格式
-                    return {
-                        content: $dom.text()
-                    }
-                },
-            }],
+            strategy,
             // 对单条数据的过滤
             filter(result) {
                 // 剔除长度小于5的数据

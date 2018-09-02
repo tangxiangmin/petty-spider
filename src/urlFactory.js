@@ -56,13 +56,7 @@ class UrlFactory {
     }
 }
 
-// todo 从其他地方填充url
-// 模拟一批url数据
 let factory = new UrlFactory()
-for (let i = 1; i < 2; ++i) {
-    let url = `https://www.qiushibaike.com/8hr/page/${i}/`
-    factory.addUrl(url)
-}
 
 // 导出数据单例
 module.exports = factory

@@ -4,7 +4,7 @@
 
 let assert = require("chai").assert
 
-let http = require('../src/http')
+let httpTest = require('../src/http')
 
 describe.skip('http test', function(){
     it('shoule 100% pass', function(){
@@ -13,7 +13,7 @@ describe.skip('http test', function(){
 
     it('getPageContent return Promise', function(){
         let url = 'test'
-        let res = http.getPageContent(url)
+        let res = httpTest.getPageContent(url)
 
         assert(res.then)
     })
