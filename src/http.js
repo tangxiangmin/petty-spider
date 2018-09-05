@@ -16,18 +16,15 @@ axios.interceptors.request.use(
     }
 );
 
-let isMock = false
 module.exports = {
     getPageContent(url) {
-        if (isMock) {
-            return fs.readFile('./mock/qiushi2.html', 'utf-8')
-        } else {
-            return axios.get(url).then(res => {
-                let html = res.data
-                // console.log(html)
-                // fs.writeFile('./mock/qiushi2.html', html, 'utf-8')
-                return html
-            })
-        }
+        return axios.get(url).then(res => {
+            let html = res.data
+            // console.log(html)
+            // fs.writeFile('./mock/1.html', html, 'utf-8')
+            return html
+        }).catch(e=>{
+            console.log(`请求${url}失败`)
+        })
     }
 }

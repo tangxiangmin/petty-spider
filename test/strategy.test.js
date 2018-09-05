@@ -3,7 +3,7 @@
  */
 
 let assert = require("chai").assert
-let Strategy = require('../src/strategy')
+let Strategy = require('../src/strategy/strategy')
 
 describe('strategy test', function () {
     it('shoule 100% pass', function () {

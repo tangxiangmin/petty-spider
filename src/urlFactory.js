@@ -43,6 +43,13 @@ class UrlFactory {
         this.queue.push(url)
     }
 
+    addBatchUrl(template, end, start = 1) {
+        for (let i = start; i < end; ++i) {
+            let url = template.replace('${i}', i)
+            this.addUrl(url)
+        }
+    }
+
     getUrl() {
         return this.queue.shift()
     }

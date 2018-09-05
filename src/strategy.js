@@ -3,13 +3,10 @@
  * 2018/8/30 上午8:48
  */
 
-let qiushi = require('./qiushi')
 
 class urlStrategy {
     constructor() {
         this.pages = []
-
-        this.setDefaultPage()
     }
 
     static match(expected, actual = '') {
@@ -19,14 +16,6 @@ class urlStrategy {
 
         if (expected instanceof RegExp) {
             return expected.test(actual)
-        }
-    }
-
-    // 内置默认的解析策略
-    setDefaultPage() {
-        for (let i = 0; i < qiushi.length; ++i) {
-            let stat = qiushi[i]
-            this.addPage(stat)
         }
     }
 

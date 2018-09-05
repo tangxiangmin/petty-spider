@@ -7,29 +7,23 @@ let log = require('./src/log')
 let Spider = require('./src/spider')
 let DB = require('./src/db')
 let factory = require('./src/urlFactory')
-let Strategy = require('./src/strategy')
+let Strategy = require('./strategy/index')
 
 let urlStrategy = new Strategy()
 
 // 模拟url
 function addQiushiUrl() {
-    for (let i = 0; i < 13; ++i) {
-        let url = `https://www.qiushibaike.com/hot/page/${i}/`
-        factory.addUrl(url)
-    }
-
-    for (let i = 0; i < 13; ++i) {
-        let url = `https://www.qiushibaike.com/text/page/${i}/`
-        factory.addUrl(url)
-    }
-
-    for (let i = 1; i < 13; ++i) {
-        let url = `https://www.qiushibaike.com/8hr/page/${i}/`
-        factory.addUrl(url)
-    }
+    factory.addBatchUrl('https://www.qiushibaike.com/8hr/page/${i}/', 10)
+    factory.addBatchUrl('https://www.qiushibaike.com/text/page/${i}/', 10)
+    factory.addBatchUrl('https://www.qiushibaike.com/hot/page/${i}/', 10)
 }
 
-addQiushiUrl()
+function addLaifuUrl() {
+    factory.addBatchUrl('http://www.laifudao.com/wangwen/youmoxiaohua_${i}.htm', 990)
+}
+
+// addQiushiUrl()
+// addLaifuUrl()
 
 let app = {
     count: 0,
