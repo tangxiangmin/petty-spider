@@ -7,6 +7,7 @@ let File = require('./file')
 let Mongo = require('./mongo')
 
 let util = require('../util')
+let log = require('../log')
 
 class DB {
     constructor(opt) {
@@ -34,7 +35,7 @@ class DB {
         if (Engine) {
             this.engine = new Engine(config)
         } else {
-            console.log(`找不到${type}类型的存储引擎`)
+            log.error(`找不到${type}类型的存储引擎`)
         }
     }
 
@@ -49,9 +50,13 @@ class DB {
     }
 
     save(data) {
+        log.info(`准备保存数据，总计${data.length}条`)
+
         let content = this.formatData(data)
 
-        this.engine.save(content)
+        // log.info(`准备保存数据，总计${data.length}条`)
+
+        return this.engine.save(content)
     }
 }
 

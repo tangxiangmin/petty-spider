@@ -1,8 +1,7 @@
 /**
- * tangxiangmin@cd.tuan800.com
  * 2018/8/30 上午8:48
+ * 一些默认的网站解析策略
  */
-
 
 let urlStrategy = require('../src/strategy')
 

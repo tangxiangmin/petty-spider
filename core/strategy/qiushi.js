@@ -1,8 +1,3 @@
-/**
- * 2018/8/30 上午8:47
- * 糗事百科内容页
- */
-
 module.exports = [
     {
         rtype: /www.qiushibaike.com\/8hr\/page/,

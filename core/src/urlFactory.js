@@ -44,7 +44,7 @@ class UrlFactory {
     }
 
     addBatchUrl(template, end, start = 1) {
-        for (let i = start; i < end; ++i) {
+        for (let i = start; i <= end; ++i) {
             let url = template.replace('${i}', i)
             this.addUrl(url)
         }
