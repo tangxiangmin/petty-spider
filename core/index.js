@@ -31,7 +31,7 @@ let app = {
                 Promise.all(tasks).then(res => {
                     resolve(true)
                 }).catch(e => {
-                    reject
+                    reject()
                 })
             }, 1)
         })
@@ -84,7 +84,6 @@ let app = {
         }
         let db
 
-        log.info(saveType)
         if (typeof handler[saveType] === 'function') {
             db = handler[saveType]()
         } else {

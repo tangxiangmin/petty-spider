@@ -1,0 +1,16 @@
+
+.tab {
+    &_nav {
+        display: flex;
+    }
+    &_item {
+
+        &-on {
+            color: red;
+        }
+
+    }
+    &_bd {
+
+    }
+}

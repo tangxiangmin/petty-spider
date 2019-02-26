@@ -1,0 +1,16 @@
+
+.page {
+    display: flex;
+    border: 1px solid #000;
+    &_sd {
+        width: 200px;
+        background-color: #ccc;
+        flex-shrink: 0;
+    }
+
+    &_mn {
+        flex: 1;
+        padding: 10px 20px;
+
+    }
+}
