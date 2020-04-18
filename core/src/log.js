@@ -4,7 +4,11 @@
  */
 
 let log4js = require('log4js')
-let logger = log4js.getLogger()
+log4js.configure({
+    appenders: {school: {type: 'file', filename: 'school.log'}},
+    categories: {default: {appenders: ['school'], level: 'debug'}}
+})
+let logger = log4js.getLogger('school')
 
 logger.level = 'debug'
 

@@ -36,8 +36,11 @@ class Spider {
     }
 
     getPageHtml() {
-        let {url} = this.config
-        return http.getPageContent(url)
+        let {url, request} = this.config
+        if (!request) {
+            request = http.getPageContent
+        }
+        return request(url)
     }
 
     parse(html) {
@@ -52,12 +55,12 @@ class Spider {
             if (typeof parse === 'function') {
                 $dom.each(function () {
                     let $this = $(this)
-                    let res = parse($this)
-                    
+                    let res = parse($this, $)
+
                     // 如果在解析函数中对数据进行拆分，则拼接数组
                     if (Array.isArray(res)) {
                         result = result.concat(res)
-                    } else {
+                    } else if (res) {
                         result.push(res)
                     }
                 })
@@ -70,7 +73,7 @@ class Spider {
     handleResult(data) {
         let {filter} = this.config
         let result = []
-        data.forEach((item) => {
+        Array.isArray(data) && data.forEach((item) => {
             if (filter(item)) {
                 result.push(item)
             }

@@ -9,6 +9,28 @@ let Mongo = require('./mongo')
 let util = require('../util')
 let log = require('../log')
 
+// 不同的config配置参数模式
+// let fileDb = {
+//     type: 'file', // 指定存储类型
+//     config: {
+//         dist: path.resolve(__dirname, `./tmp/${this.count}.json`),
+//         format(data) {
+//             return JSON.stringify(data)
+//         },
+//     },
+// }
+
+// let mongoDb = {
+//     type: 'mongo',
+//     config: {
+//         host: 'mongodb://localhost/shymean',
+//         document: 'joke',
+//         schema: {
+//             content: String
+//         },
+//     }
+// }
+
 class DB {
     constructor(opt) {
         let {type, config, format} = opt

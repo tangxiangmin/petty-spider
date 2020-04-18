@@ -1,0 +1,29 @@
+{
+  "name": "petty-spider",
+  "version": "1.0.0",
+  "description": "一个使用electron构建的爬虫客户端",
+  "main": "code/index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "redis": "^3.0.2",
+    "qs": "^6.9.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tangxiangmin/petty-spider.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tangxiangmin/petty-spider/issues"
+  },
+  "homepage": "https://github.com/tangxiangmin/petty-spider#readme"
+}

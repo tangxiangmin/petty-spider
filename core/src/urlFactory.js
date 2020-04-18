@@ -55,15 +55,14 @@ class UrlFactory {
     }
 
     // 流水线
-    createAssemblyLine(cb, length) {
+    createAssemblyLine(cb, length, delay = 1000) {
         let group = util.genGroup(this.queue, length)
         util.throttle(group, (url) => {
             cb(url)
-        })
+        }, delay)
     }
 }
 
-let factory = new UrlFactory()
-
+module.exports = UrlFactory
 // 导出数据单例
-module.exports = factory
+// module.exports = factory
