@@ -1,13 +1,12 @@
 /**
  * 2018/8/25 下午9:05
  */
-let path = require('path')
 let log = require('./src/log')
 
 let Spider = require('./src/spider')
 let DB = require('./src/db')
 let UrlFactory = require('./src/urlFactory')
-let Strategy = require('./strategy/index')
+let Strategy = require('./src/strategy')
 
 class App {
     constructor() {

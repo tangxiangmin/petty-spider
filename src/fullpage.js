@@ -2,7 +2,7 @@ let axios = require("axios")
 let cheerio = require("cheerio")
 
 let fs = require("fs-extra")
-let http = require('http')
+let http = require('src/http')
 let path = require('path')
 
 let config = {

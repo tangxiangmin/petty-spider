@@ -60,8 +60,8 @@ getProxyList().then(function (proxyList) {
                 body = body.toString();
                 console.log(body);
                 eval(`var ret = ${body}`);
-                if (ret) {
-                    console.log(`验证成功==>> ${ret.address}`);
+                if (response) {
+                    console.log(`验证成功==>> ${response.address}`);
                 }
             } catch (e) {
                 // console.error(e);

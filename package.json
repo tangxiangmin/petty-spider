@@ -1,17 +1,19 @@
 {
   "name": "petty-spider",
   "version": "1.0.0",
-  "description": "一个使用electron构建的爬虫客户端",
-  "main": "code/index.js",
-  "directories": {
-    "example": "examples"
-  },
+  "description": "一个简便的node爬虫框架",
+  "main": "index.js",
   "dependencies": {
-    "axios": "^0.19.2",
-    "redis": "^3.0.2",
-    "qs": "^6.9.3"
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2",
+    "fs-extra": "^6.0.1",
+    "mongodb": "^3.1.4",
+    "mongoose": "^5.2.10"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "log4js": "^3.0.5"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
