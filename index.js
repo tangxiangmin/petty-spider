@@ -8,11 +8,25 @@ let DB = require('./src/db')
 let UrlFactory = require('./src/urlFactory')
 let Strategy = require('./src/strategy')
 
+const noop = () => {
+}
+
+const defaultHooks = {
+    afterEach: noop
+}
+
 class App {
     constructor() {
         this.factory = new UrlFactory()
         this.urlStrategy = new Strategy()
-        this.count = 0
+        this.config = {}
+        this.tasks = []
+    }
+
+    // 验证task格式是否正确
+    // todo 重构为TS
+    _validTask(task) {
+        return task && (typeof task.url === 'string') && (typeof task.request === 'function')
     }
 
     // 预先设置抓取任务
@@ -20,37 +34,72 @@ class App {
         this.factory.addBatchUrl(url, num)
     }
 
-    addStrategy(config) {
-        this.urlStrategy.addPage(config)
+    // 添加抓取策略
+    addStrategy(strategy) {
+        this.urlStrategy.addPage(strategy)
     }
 
-    start(opts) {
-        return new Promise((resolve, reject) => {
-            this.factory.createAssemblyLine((urlArr) => {
-                let tasks = []
-                urlArr.forEach(url => {
-                    tasks.push(
-                        this.init({...opts, url,})
-                    )
-                    this.count++
-                })
-                Promise.all(tasks).then(res => {
-                    resolve(true)
-                }).catch(e => {
-                    reject(e)
-                })
-            }, 1, 500)
-        })
+    // 添加配置
+    addConfig(config) {
+        // todo 校验config参数
+        this.config = config
+    }
+
+    // 添加一个抓取任务
+    addTask(task) {
+        if (!this._validTask(task)) throw `app.addTask：task参数类型错误`
+        this.tasks.push(task)
+    }
+
+    /**
+     *
+     * @param mode 指定config类型
+     * @param hooks，任务钩子函数配置项
+     * @returns {Promise<void>}
+     */
+    async start(mode, hooks = defaultHooks) {
+        let modeConfig = this.config && this.config[mode]
+        if (!modeConfig) throw `app.start: 未指定${mode}类型配置，请先调用addConfig添加`
+
+        // todo 同时抓取多个任务
+        let {tasks} = this
+        while (tasks.length) {
+            let task = tasks.shift()
+            if (!this._validTask(task)) continue
+
+            await this.initSpider(modeConfig, task)
+
+            let next = tasks[0] // 下一个待抓取的任务
+            await hooks.afterEach(task, next)
+        }
+
+        // return new Promise((resolve, reject) => {
+        //     this.factory.createAssemblyLine((urlArr) => {
+        //         let tasks = []
+        //         urlArr.forEach(url => {
+        //             tasks.push(
+        //                 this.init({...modeConfig, url,})
+        //             )
+        //         })
+        //         Promise.all(tasks).then(res => {
+        //             resolve(true)
+        //         }).catch(e => {
+        //             reject(e)
+        //         })
+        //     }, 1, 500)
+        // })
     }
 
     // 单个页面的抓取任务
-    init({url, saveConfig, request}) {
+    initSpider({saveConfig, request}, task) {
+        let {url} = task
         let strategy = this.urlStrategy.getPageStrategy(url)
         let sp = new Spider({
-            url,
             // 单个页面的爬取区域
             strategy,
-            request
+            request: () => {
+                return task.request(request)
+            }
         })
 
         let db = new DB(saveConfig)
@@ -60,7 +109,7 @@ class App {
             log.info(`url:${url}抓取完毕, 获取数据:${data.length}`)
             return db.save(data)
         }).catch(e => {
-            log.error(e)
+            log.error('页面抓取失败', e)
             throw e
         })
     }

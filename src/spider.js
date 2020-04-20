@@ -5,7 +5,7 @@
 
 let cheerio = require('cheerio')
 let util = require('./util')
-let http = require('./http')
+let log = require('./log')
 
 class Spider {
     constructor(config) {
@@ -28,28 +28,22 @@ class Spider {
     }
 
     start() {
-        return this.getPageHtml().then(html => {
+        let {request} = this.config
+        return request().then(html => {
             let result = this.parse(html)
-            let data = this.handleResult(result)
-            return data
+            return this.handleResult(result)
+        }).catch(e => {
+            log.error('抓取任务报错', e)
         })
     }
 
-    getPageHtml() {
-        let {url, request} = this.config
-        if (!request) {
-            request = http.getPageContent
-        }
-        return request(url)
-    }
-
+    // todo 处理直接抓取接口的解析
     parse(html) {
         let $ = cheerio.load(html);
         let strategy = this.getStrategy()
 
         let result = []
-        strategy.forEach(strat => {
-            let {selector, parse} = strat
+        strategy.forEach(({selector, parse}) => {
             let $dom = $(selector)
 
             if (typeof parse === 'function') {

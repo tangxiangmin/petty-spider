@@ -23,12 +23,11 @@ class FileDB {
             return new Promise((resolve, reject) => {
                 fs.writeFile(dist, data, encoding, function (err) {
                     if (err) {
-                        log.error('写入数据错误', err)
-
-                        return reject(err)
+                        log.error('File写入数据错误', err)
+                    } else {
+                        log.info(`====File.save ${dist} success====`)
+                        resolve(true)
                     }
-                    console.log(`====File.save ${dist} success====`)
-                    resolve(true)
                 });
             })
         })

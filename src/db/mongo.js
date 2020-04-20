@@ -3,16 +3,17 @@
  */
 
 const mongoose = require('mongoose')
-
-let instance = null
+let log = require('../log')
 
 class Mogno {
+    static instance = undefined;
+
     constructor(config) {
-        if (instance) {
-            return instance
+        if (Mogno.instance) {
+            return Mogno.instance
         }
 
-        instance = this
+        Mogno.instance = this
 
         let {schema, host, document} = config
         this.schema = schema
@@ -32,7 +33,7 @@ class Mogno {
             }
         })
         connect.once('open', () => {
-            console.log(`The mongodb is opened!`)
+            // console.log(`The mongodb is opened!`)
         })
     }
 
@@ -53,8 +54,10 @@ class Mogno {
         })
 
         return Promise.all(tasks).then(res => {
-            console.log('success save in mognodb')
+            log.info(`====success save in mongodb====`)
             // this.close()
+        }).catch(e => {
+            log.error(`mongodb保存数据错误`, e)
         })
     }
 

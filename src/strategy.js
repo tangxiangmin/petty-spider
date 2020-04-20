@@ -3,7 +3,7 @@
  */
 
 
-class urlStrategy {
+class UrlStrategy {
     constructor() {
         this.pages = []
     }
@@ -30,11 +30,11 @@ class urlStrategy {
             let page = pages[i]
             let {rtype, strategy} = page
 
-            if (urlStrategy.match(rtype, url)) {
+            if (UrlStrategy.match(rtype, url)) {
                 return strategy
             }
         }
     }
 }
 
-module.exports = urlStrategy
+module.exports = UrlStrategy
