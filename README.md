@@ -61,7 +61,7 @@ let sp = new Spider({
     // some spider config
 })
 let db = new DB({
-    // some db config
+    // some dbEngine config
 })
 
 sp.start().then(data => {

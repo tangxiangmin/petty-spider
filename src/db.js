@@ -3,11 +3,12 @@
  * 为爬虫支持不同类型的数据存储方式
  */
 
-let File = require('./file')
-let Mongo = require('./mongo')
+let File = require('./dbEngine/file')
+let Mongo = require('./dbEngine/mongo')
+let Upload = require('./dbEngine/upload')
 
-let util = require('../util')
-let log = require('../log')
+let util = require('./util')
+let log = require('./log')
 
 // 不同的config配置参数模式
 // let fileDb = {
@@ -46,14 +47,13 @@ class DB {
     // 设置数据存储方式，对象对外暴露save(data)接口即可
     setEngine(type, defaultEngine = null) {
         let {config} = this
-        let Engine = defaultEngine
-
-        if (type === 'file') {
-            Engine = File
-        } else if (type === 'mongo') {
-            Engine = Mongo
+        let engineMap = {
+            file: File,
+            mongo: Mongo,
+            upload: Upload
         }
 
+        let Engine = engineMap[type] || defaultEngine
         if (Engine) {
             this.engine = new Engine(config)
         } else {

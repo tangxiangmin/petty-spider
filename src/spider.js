@@ -37,7 +37,7 @@ class Spider {
         })
     }
 
-    // todo 处理直接抓取接口的解析
+    // todo 处理直接抓取接口的json解析
     parse(html) {
         let $ = cheerio.load(html);
         let strategy = this.getStrategy()
@@ -49,7 +49,13 @@ class Spider {
             if (typeof parse === 'function') {
                 $dom.each(function () {
                     let $this = $(this)
-                    let res = parse($this, $)
+                    let res
+
+                    try {
+                        res = parse($this, $)
+                    } catch (e) {
+                        log.error('parse 解析失败', e)
+                    }
 
                     // 如果在解析函数中对数据进行拆分，则拼接数组
                     if (Array.isArray(res)) {

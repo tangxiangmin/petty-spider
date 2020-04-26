@@ -1,3 +1,4 @@
+// 抓取整站 todo 使用APP 重构
 let axios = require("axios")
 let cheerio = require("cheerio")
 
@@ -6,8 +7,8 @@ let http = require('src/http')
 let path = require('path')
 
 let config = {
-    index: "http://www.fswangli.com.cn/",
-    hostname: "http://www.fswangli.com.cn/"
+    index: "",
+    hostname: ""
 };
 
 // 保存已获取的资源

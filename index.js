@@ -2,10 +2,10 @@
  * 2018/8/25 下午9:05
  */
 let log = require('./src/log')
+let http = require('./src/http')
 
 let Spider = require('./src/spider')
 let DB = require('./src/db')
-let UrlFactory = require('./src/urlFactory')
 let Strategy = require('./src/strategy')
 
 const noop = () => {
@@ -16,8 +16,8 @@ const defaultHooks = {
 }
 
 class App {
+
     constructor() {
-        this.factory = new UrlFactory()
         this.urlStrategy = new Strategy()
         this.config = {}
         this.tasks = []
@@ -29,11 +29,6 @@ class App {
         return task && (typeof task.url === 'string') && (typeof task.request === 'function')
     }
 
-    // 预先设置抓取任务
-    addUrl(url, num = 1) {
-        this.factory.addBatchUrl(url, num)
-    }
-
     // 添加抓取策略
     addStrategy(strategy) {
         this.urlStrategy.addPage(strategy)
@@ -43,6 +38,19 @@ class App {
     addConfig(config) {
         // todo 校验config参数
         this.config = config
+    }
+
+    // 创建一个抓取任务
+    createTask(startUrl, request) {
+        if (!request) {
+            request = function (api) {
+                return api({url: startUrl})
+            }
+        }
+        return {
+            url: startUrl,
+            request
+        }
     }
 
     // 添加一个抓取任务
@@ -72,22 +80,6 @@ class App {
             let next = tasks[0] // 下一个待抓取的任务
             await hooks.afterEach(task, next)
         }
-
-        // return new Promise((resolve, reject) => {
-        //     this.factory.createAssemblyLine((urlArr) => {
-        //         let tasks = []
-        //         urlArr.forEach(url => {
-        //             tasks.push(
-        //                 this.init({...modeConfig, url,})
-        //             )
-        //         })
-        //         Promise.all(tasks).then(res => {
-        //             resolve(true)
-        //         }).catch(e => {
-        //             reject(e)
-        //         })
-        //     }, 1, 500)
-        // })
     }
 
     // 单个页面的抓取任务
@@ -114,6 +106,9 @@ class App {
         })
     }
 }
+
+App.http = http
+App.log = log
 
 module.exports = App
 
