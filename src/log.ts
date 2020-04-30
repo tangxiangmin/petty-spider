@@ -23,4 +23,6 @@ let logger = log4js.getLogger('spider')
 
 logger.level = 'debug'
 
-module.exports = logger
+// todo 为单个项目暴露配置信息
+
+export default logger

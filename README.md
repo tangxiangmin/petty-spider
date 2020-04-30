@@ -60,7 +60,7 @@ let sp = new Spider({
     auth,
     // some spider config
 })
-let db = new DB({
+let db = new Db({
     // some dbEngine config
 })
 
@@ -147,7 +147,7 @@ let mongo = {
     }
 }
 ```
-在`DB`构造函数中，通过`type`指定存储引擎，然后在`config`中传入对应的配置参数即可
+在`Db`构造函数中，通过`type`指定存储引擎，然后在`config`中传入对应的配置参数即可
 
 ## 多个页面的爬取流程
 多个页面的爬取，不单单是遍历url数组，重复爬取单个页面的数据，还需要考虑下面问题：

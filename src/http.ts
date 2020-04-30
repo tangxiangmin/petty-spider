@@ -6,5 +6,4 @@
 let axios = require('axios')
 // let fs = require('fs-extra')
 
-
-module.exports = axios
+export default axios

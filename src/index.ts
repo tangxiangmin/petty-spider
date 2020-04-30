@@ -1,21 +1,24 @@
-/**
- * 2018/8/25 下午9:05
- */
-let log = require('./src/log')
-let http = require('./src/http')
+/// <reference path="./global.d.ts" />
 
-let Spider = require('./src/spider')
-let DB = require('./src/db')
-let Strategy = require('./src/strategy')
+import log from './log'
+import http from './http'
+import DB from './db'
+import Strategy from './strategy'
+import Spider from './spider'
 
-const noop = () => {
-}
+type Task = PettySpider.SpiderTask
+
 
 const defaultHooks = {
-    afterEach: noop
+    afterEach: (task: Task, next: Task) => {
+    }
 }
 
 class App {
+
+    urlStrategy: Strategy;
+    config: Object;
+    tasks: Array<Task>
 
     constructor() {
         this.urlStrategy = new Strategy()
@@ -24,8 +27,7 @@ class App {
     }
 
     // 验证task格式是否正确
-    // todo 重构为TS
-    _validTask(task) {
+    _validTask(task: Task) {
         return task && (typeof task.url === 'string') && (typeof task.request === 'function')
     }
 
@@ -54,7 +56,7 @@ class App {
     }
 
     // 添加一个抓取任务
-    addTask(task) {
+    addTask(task: Task) {
         if (!this._validTask(task)) throw `app.addTask：task参数类型错误`
         this.tasks.push(task)
     }
@@ -91,7 +93,7 @@ class App {
             strategy,
             request: () => {
                 return task.request(request)
-            }
+            },
         })
 
         let db = new DB(saveConfig)
@@ -107,8 +109,20 @@ class App {
     }
 }
 
-App.http = http
-App.log = log
+export default App
 
-module.exports = App
+// 暴露一些工具方法
+const sleep = (ms) => {
+    if (!ms) {
+        ms = Math.random() * 3000 + 3000
+    }
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms)
+    })
+}
 
+export {
+    http,
+    log,
+    sleep
+}

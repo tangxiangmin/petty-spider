@@ -3,6 +3,7 @@
 
 参考
 * https://cloud.tencent.com/developer/news/343582
+* https://zhuanlan.zhihu.com/p/31431224
 
 
 ## ip代理原理

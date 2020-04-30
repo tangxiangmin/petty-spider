@@ -3,12 +3,10 @@
  * 为爬虫支持不同类型的数据存储方式
  */
 
-let File = require('./dbEngine/file')
-let Mongo = require('./dbEngine/mongo')
-let Upload = require('./dbEngine/upload')
-
-let util = require('./util')
-let log = require('./log')
+import File from './dbEngine/file'
+import Mongo from './dbEngine/mongo'
+import Upload from './dbEngine/upload'
+import log from './log'
 
 // 不同的config配置参数模式
 // let fileDb = {
@@ -33,6 +31,10 @@ let log = require('./log')
 // }
 
 class DB {
+    type: string
+    config: any // todo 定义config类型
+    engine: File | Mongo | Upload
+
     constructor(opt) {
         let {type, config, format} = opt
 
@@ -64,11 +66,7 @@ class DB {
     // 格式化数据
     formatData(data) {
         let {format} = this.config
-        if (util.isFunc(format)) {
-            return format(data)
-        } else {
-            return data
-        }
+        return format ? format(data) : data
     }
 
     save(data) {
@@ -82,4 +80,5 @@ class DB {
     }
 }
 
-module.exports = DB
+
+export default DB

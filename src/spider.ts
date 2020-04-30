@@ -3,11 +3,18 @@
  * 解析页面逻辑
  */
 
+
 let cheerio = require('cheerio')
-let util = require('./util')
-let log = require('./log')
+import log from './log'
+
+// 默认过滤函数
+let defaultFilter = _ => {
+    return true
+}
 
 class Spider {
+    config: { request: Function, filter: Function, strategy: Array<PettySpider.SingleStrategy> }
+
     constructor(config) {
         this.setDefaultConfig(config)
         this.config = config
@@ -16,12 +23,8 @@ class Spider {
     setDefaultConfig(config) {
         let {filter} = config
 
-        // 默认过滤函数
-        let defaultFilter = _ => {
-            return true
-        }
 
-        if (!util.isFunc(filter)) {
+        if (!filter) {
             config.filter = defaultFilter
         }
         return config
@@ -87,4 +90,4 @@ class Spider {
     }
 }
 
-module.exports = Spider
+export default Spider

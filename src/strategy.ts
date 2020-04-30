@@ -2,8 +2,14 @@
  * 2018/8/30 上午8:48
  */
 
+interface Page {
+    rtype: string | RegExp,
+    strategy: Array<PettySpider.SingleStrategy>
+}
 
 class UrlStrategy {
+    pages: Array<Page>
+
     constructor() {
         this.pages = []
     }
@@ -37,4 +43,4 @@ class UrlStrategy {
     }
 }
 
-module.exports = UrlStrategy
+export default UrlStrategy

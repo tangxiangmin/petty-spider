@@ -1,6 +1,8 @@
 // 直接将抓取的数据上传
 
 class UploadDB {
+    request: Function
+
     constructor({request}) {
         this.request = request
     }
@@ -10,4 +12,5 @@ class UploadDB {
     }
 }
 
-module.exports = UploadDB
+export default UploadDB
+

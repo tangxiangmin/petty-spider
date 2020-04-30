@@ -3,10 +3,14 @@
  */
 
 const mongoose = require('mongoose')
-let log = require('../log')
+import log from '../log'
 
 class Mogno {
     static instance = undefined;
+    host: string
+    schema: Object
+    document: string
+    model: any
 
     constructor(config) {
         if (Mogno.instance) {
@@ -66,4 +70,4 @@ class Mogno {
     }
 }
 
-module.exports = Mogno
+export default Mogno

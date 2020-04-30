@@ -5,9 +5,11 @@
 
 let fs = require('fs-extra')
 let path = require('path')
-let log = require('../log')
+import log from '../log'
 
 class FileDB {
+    config: { dist: string }
+
     constructor(config) {
         this.config = config
     }
@@ -34,4 +36,4 @@ class FileDB {
     }
 }
 
-module.exports = FileDB
+export default FileDB
