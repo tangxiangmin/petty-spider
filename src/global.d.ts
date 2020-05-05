@@ -1,6 +1,7 @@
 declare namespace PettySpider {
     interface SingleStrategy {
-        selector: string,
+        selector?: string,
+        json?: Boolean,
         parse: Function
     }
 

@@ -71,11 +71,7 @@ class DB {
 
     save(data) {
         log.info(`准备保存数据，总计${data.length}条`)
-
         let content = this.formatData(data)
-
-        // log.info(`准备保存数据，总计${data.length}条`)
-
         return this.engine.save(content)
     }
 }

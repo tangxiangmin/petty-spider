@@ -2,6 +2,7 @@
  * 2018/8/23 下午11:04
  * 解析页面逻辑
  */
+import SingleStrategy = PettySpider.SingleStrategy;
 
 
 let cheerio = require('cheerio')
@@ -40,37 +41,52 @@ class Spider {
         })
     }
 
-    // todo 处理直接抓取接口的json解析
-    parse(html) {
-        let $ = cheerio.load(html);
+    parse(response) {
         let strategy = this.getStrategy()
-
         let result = []
-        strategy.forEach(({selector, parse}) => {
-            let $dom = $(selector)
 
-            if (typeof parse === 'function') {
-                $dom.each(function () {
-                    let $this = $(this)
-                    let res
-
-                    try {
-                        res = parse($this, $)
-                    } catch (e) {
-                        log.error('parse 解析失败', e)
-                    }
-
-                    // 如果在解析函数中对数据进行拆分，则拼接数组
-                    if (Array.isArray(res)) {
-                        result = result.concat(res)
-                    } else if (res) {
-                        result.push(res)
-                    }
-                })
+        strategy.forEach(({selector, json, parse}: SingleStrategy) => {
+            try {
+                if (json) {
+                    parseJSON(parse)
+                } else {
+                    parseHTML(selector, parse)
+                }
+            } catch (e) {
+                log.error('parse 解析失败', e)
             }
         })
 
         return result
+
+        function formatParseResult(res) {
+            // 如果在解析函数中对数据进行拆分，则拼接数组
+            if (Array.isArray(res)) {
+                result = result.concat(res)
+            } else if (res) {
+                result.push(res)
+            }
+        }
+
+        // 解析JSON响应，处理直接抓取接口的形式
+        function parseJSON(parse) {
+            let res = parse(response)
+            formatParseResult(res)
+        }
+
+        // 解析HTML响应
+        function parseHTML(selector, parse) {
+            let $ = cheerio.load(response);
+            let $dom = $(selector)
+
+            $dom.each(function () {
+                let $this = $(this)
+                let res = parse($this, $)
+
+
+                formatParseResult(res)
+            })
+        }
     }
 
     handleResult(data) {

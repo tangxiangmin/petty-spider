@@ -96,15 +96,16 @@ class App {
             },
         })
 
-        let db = new DB(saveConfig)
         log.info(`开始抓取:${url}`)
 
-        return sp.start().then(data => {
+        return sp.start().then((data: Array<any>) => {
+            if (!data) throw "未抓取到任何数据"
             log.info(`url:${url}抓取完毕, 获取数据:${data.length}`)
+            let db = new DB(saveConfig)
             return db.save(data)
         }).catch(e => {
             log.error('页面抓取失败', e)
-            throw e
+            // throw e
         })
     }
 }

@@ -83,7 +83,7 @@ sp.start().then(data => {
 node端也有很多不错的请求工具，目前暂时使用的是`axios`
 
 ### 解析页面数据
-
+一个基本的`strategy`配置如下
 ```js
 {
         rtype: /www.laifudao.com\/wangwen\/youmoxiaohua/,
@@ -148,6 +148,23 @@ let mongo = {
 }
 ```
 在`Db`构造函数中，通过`type`指定存储引擎，然后在`config`中传入对应的配置参数即可
+
+## IP代理池
+
+
+爬虫的访问频率一般比较高，除了控制每次请求的间隔之外，还可以使用ip代理进行访问，抹除原始访问记录
+
+参考
+* https://cloud.tencent.com/developer/news/343582
+* https://zhuanlan.zhihu.com/p/31431224
+* [大数据时代，用爬虫拿到数据违法吗？数据可以商业化吗？](https://zhuanlan.zhihu.com/p/66870379)
+
+### ip代理原理
+
+### 使用ip代理
+* 直接购买xxx服务，
+* 抓取免费代理，然后自己写校验，提供一个借口给爬虫使用
+### 设计ip池
 
 ## 多个页面的爬取流程
 多个页面的爬取，不单单是遍历url数组，重复爬取单个页面的数据，还需要考虑下面问题：

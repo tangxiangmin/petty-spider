@@ -15,10 +15,13 @@
     "@types/node": "^13.13.4",
     "chai": "^4.1.2",
     "log4js": "^3.0.5",
+    "typedoc": "^0.17.6",
     "typescript": "^3.8.3"
   },
   "scripts": {
     "dev": "tsc -w",
+    "build": "tsc",
+    "doc": "typedoc --out docs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
