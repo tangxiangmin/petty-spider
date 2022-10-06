@@ -4,7 +4,7 @@
   "description": "一个简便的node爬虫框架",
   "main": "lib/index.js",
   "dependencies": {
-    "axios": "^0.18.1",
+    "axios": "^1.0.0",
     "cheerio": "^1.0.0-rc.2",
     "fs-extra": "^6.0.1",
     "iconv-lite": "^0.5.1",
