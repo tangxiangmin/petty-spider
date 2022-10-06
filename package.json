@@ -14,7 +14,7 @@
   "devDependencies": {
     "@types/node": "^13.13.4",
     "chai": "^4.1.2",
-    "log4js": "^3.0.5",
+    "log4js": "^6.4.0",
     "typedoc": "^0.17.6",
     "typescript": "^3.8.3"
   },
