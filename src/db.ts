@@ -3,9 +3,9 @@
  * 为爬虫支持不同类型的数据存储方式
  */
 
-import File from './dbEngine/file'
-import Mongo from './dbEngine/mongo'
-import Upload from './dbEngine/upload'
+import File, {FileDBConfig} from './dbEngine/file'
+import Mongo, {MongoDBConfig} from './dbEngine/mongo'
+import Upload, {UploadDBConfig} from './dbEngine/upload'
 import log from './log'
 
 // 不同的config配置参数模式
@@ -30,50 +30,55 @@ import log from './log'
 //     }
 // }
 
+type DBBaseConfig = {
+  type: 'file'
+  config: FileDBConfig,
+} | {
+  type: 'mongo',
+  config: MongoDBConfig,
+} | {
+  type: 'upload',
+  config: UploadDBConfig,
+}
+
+export type DBConfig = DBBaseConfig & {
+  format?: (data: any) => any,
+}
+
+const engineMap = {
+  file: File,
+  mongo: Mongo,
+  upload: Upload
+}
+
 class DB {
-    type: string
-    config: any // todo 定义config类型
-    engine: File | Mongo | Upload
+  engine: File | Mongo | Upload
+  format: (data: any) => any
 
-    constructor(opt) {
-        let {type, config, format} = opt
+  constructor(opt: DBConfig) {
+    let {type, config, format} = opt
 
-        this.type = type
-        this.config = config
+    this.format = format
 
-        this.engine = null
-
-        this.setEngine(type)
+    let Engine = engineMap[type]
+    if (Engine) {
+      this.engine = new Engine(config)
+    } else {
+      log.error(`找不到${type}类型的存储引擎`)
     }
+  }
 
-    // 设置数据存储方式，对象对外暴露save(data)接口即可
-    setEngine(type, defaultEngine = null) {
-        let {config} = this
-        let engineMap = {
-            file: File,
-            mongo: Mongo,
-            upload: Upload
-        }
+  // 格式化数据
+  private formatData(data) {
+    let {format} = this
+    return format ? format(data) : data
+  }
 
-        let Engine = engineMap[type] || defaultEngine
-        if (Engine) {
-            this.engine = new Engine(config)
-        } else {
-            log.error(`找不到${type}类型的存储引擎`)
-        }
-    }
-
-    // 格式化数据
-    formatData(data) {
-        let {format} = this.config
-        return format ? format(data) : data
-    }
-
-    save(data) {
-        log.info(`准备保存数据，总计${data.length}条`)
-        let content = this.formatData(data)
-        return this.engine.save(content)
-    }
+  public save(data: Array<any>) {
+    log.info(`准备保存数据，总计${data.length}条`)
+    const content = this.formatData(data)
+    return this.engine.save(JSON.stringify(content))
+  }
 }
 
 

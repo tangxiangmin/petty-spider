@@ -9,20 +9,21 @@
     "fs-extra": "^6.0.1",
     "iconv-lite": "^0.5.1",
     "mongodb": "^3.1.4",
-    "mongoose": "^5.7.5"
+    "mongoose": "^5.7.5",
+    "log4js": "^3.0.5"
   },
   "devDependencies": {
-    "@types/node": "^13.13.4",
-    "chai": "^4.1.2",
-    "log4js": "^3.0.5",
+    "@types/cheerio": "^0.22.31",
+    "@types/node": "^13.13.52",
     "typedoc": "^0.17.6",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "vitest": "^0.31.0"
   },
   "scripts": {
     "dev": "tsc -w",
     "build": "tsc",
     "doc": "typedoc --out docs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest"
   },
   "repository": {
     "type": "git",

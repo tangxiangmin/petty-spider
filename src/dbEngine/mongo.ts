@@ -5,69 +5,77 @@
 const mongoose = require('mongoose')
 import log from '../log'
 
+export type MongoDBConfig = {
+  schema: {
+    [prop: string]: any
+  },
+  host: string,
+  document: string
+}
+
 class Mogno {
-    static instance = undefined;
-    host: string
-    schema: Object
-    document: string
-    model: any
+  static instance = undefined;
+  host: string
+  schema: Object
+  document: string
+  model: any
 
-    constructor(config) {
-        if (Mogno.instance) {
-            return Mogno.instance
-        }
-
-        Mogno.instance = this
-
-        let {schema, host, document} = config
-        this.schema = schema
-        this.host = host
-        this.document = document
-
-        this.initConnect()
-        this.model = this.getModel()
+  constructor(config: MongoDBConfig) {
+    if (Mogno.instance) {
+      return Mogno.instance
     }
 
-    initConnect() {
-        mongoose.connect(this.host, {useNewUrlParser: true})
-        const connect = mongoose.connection
-        connect.on('error', err => {
-            if (err) {
-                console.log(`connect error: ${err}`)
-            }
-        })
-        connect.once('open', () => {
-            // console.log(`The mongodb is opened!`)
-        })
-    }
+    Mogno.instance = this
 
-    getModel() {
-        const Schema = mongoose.Schema;
+    const {schema, host, document} = config
+    this.schema = schema
+    this.host = host
+    this.document = document
 
-        const schema = new Schema(this.schema)
-        return mongoose.model(this.document, schema)
-    }
+    this.initConnect()
+    this.model = this.getModel()
+  }
 
-    save(data) {
-        let Model = this.model
-        let tasks = []
-        data.forEach(item => {
-            let row = new Model(item)
-            let handler = row.save()
-            tasks.push(handler)
-        })
+  initConnect() {
+    mongoose.connect(this.host, {useNewUrlParser: true})
+    const connect = mongoose.connection
+    connect.on('error', err => {
+      if (err) {
+        console.log(`connect error: ${err}`)
+      }
+    })
+    connect.once('open', () => {
+      // console.log(`The mongodb is opened!`)
+    })
+  }
 
-        return Promise.all(tasks).then(res => {
-            log.info(`====success save in mongodb====`)
-            // this.close()
-        }).catch(e => {
-            log.error(`mongodb保存数据错误`, e)
-        })
-    }
+  getModel() {
+    const Schema = mongoose.Schema;
 
-    close() {
-        mongoose.disconnect()
-    }
+    const schema = new Schema(this.schema)
+    return mongoose.model(this.document, schema)
+  }
+
+  save(data) {
+    let Model = this.model
+    let tasks = []
+    data.forEach(item => {
+      let row = new Model(item)
+      let handler = row.save()
+      tasks.push(handler)
+    })
+
+    return Promise.all(tasks).then(res => {
+      log.info(`====success save in mongodb====`)
+      // this.close()
+    }).catch(e => {
+      log.error(`mongodb保存数据错误`, e)
+    })
+  }
+
+  close() {
+    mongoose.disconnect()
+  }
 }
 
 export default Mogno

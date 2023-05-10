@@ -4,8 +4,7 @@
     "target": "esnext",
     "module": "commonjs",
     "allowSyntheticDefaultImports": true,
-    "declaration": true,
-    "allowJs": true
+    "allowJs": false
   },
   "include": [
     "src/**/*"

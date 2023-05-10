@@ -7,33 +7,37 @@ let fs = require('fs-extra')
 let path = require('path')
 import log from '../log'
 
+export type FileDBConfig = {
+  dist: string
+}
+
 class FileDB {
-    config: { dist: string }
+  config: FileDBConfig
 
-    constructor(config) {
-        this.config = config
-    }
+  constructor(config) {
+    this.config = config
+  }
 
-    save(data) {
-        let {dist} = this.config
-        let disDir = path.dirname(dist)
-        log.info('File准备写入数据')
+  save(data: string) {
+    const {dist} = this.config
+    const disDir = path.dirname(dist)
+    log.info('File准备写入数据')
 
-        return fs.ensureDir(disDir).then(() => {
-            let encoding = 'utf-8'
+    return fs.ensureDir(disDir).then(() => {
+      let encoding = 'utf-8'
 
-            return new Promise((resolve, reject) => {
-                fs.writeFile(dist, data, encoding, function (err) {
-                    if (err) {
-                        log.error('File写入数据错误', err)
-                    } else {
-                        log.info(`====File.save ${dist} success====`)
-                        resolve(true)
-                    }
-                });
-            })
-        })
-    }
+      return new Promise((resolve, reject) => {
+        fs.appendFile(dist, data + '\n', encoding, function (err) {
+          if (err) {
+            log.error('File写入数据错误', err)
+          } else {
+            log.info(`====File.save ${dist} success====`)
+            resolve(true)
+          }
+        });
+      })
+    })
+  }
 }
 
 export default FileDB
