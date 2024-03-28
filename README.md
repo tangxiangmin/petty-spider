@@ -10,173 +10,188 @@ petty-spider
 
 实际上的抓取请求有各种情况，除了最基础的get请求url，还包括
 * get、post请求混用，通过js触发表单post提交页面
-* 各种请求返回各不相同，比如页面编码，在框架代码中封装不太合适
+* 各种请求返回各不相同，比如HTML、JSON，以及不同的页面编码等，在框架代码中封装不太合适
 * 有时候希望在请求前后插入一些特定的逻辑，以及用户鉴权等信息，如果通过配置项添加、使用成本较高
 
 所以为了减少学习成本，将整个请求的逻辑交给用户，只需实现一个`request(url)`的方法，该方法返回结果为`Promise.resolve(html)`
 
-### 多种模式
+### 缓存调试
 
-在进行爬虫开发时，往往需要经历各种调试和测试，因此引入`mode`的概念，可以通过`app.addConfig`进行配置各种模式，然后再`app.start`的时候指定运行的模式
+在进行爬虫开发时，往往需要经历各种调试和测试，频繁请求源站数据并不是特别好的行为。因此需要实现缓存源站数据的功能。
 
-### 动态增加页面
-对于待抓取页面，有两种情形，以最常见的列表页抓取为例
-* 从入口页面开始，依次抓取下一页的内容，涉及到动态添加url
-* 提前准备好一个url列表，循环整个列表并抓取
+### 日志
 
-在更复杂的需求中，可能存在上述二者均有的情况，依次需要实现动态添加待抓取url的功能，涉及到
-* 动态添加url
-* 记录已经抓取的页面，避免进入死循环，
+需要在核心节点打日志，在自动化的过程中有迹可循。
 
-### 异常处理
+## 使用：单个页面的爬取流程
 
-* 责任链模式封装异常，通过日志记录错误
-* 错误重试?问题是可能存在多种错误，如网络请求、文件保存等地方的错误，一股脑从抓取任务开始重试也不是很明智
-
-## 特性
-* [ ] 通过配置文件，快速抓取数据
-* [ ] 并发请求、消息队列、自动登录
-
-## Todo
-* [ ] 记录错误日志，尝试重新爬取数据 
-
-## 使用
-// todo 暂时参考index.js
-
-## 单个页面的爬取流程
-> 写爬虫的经验比较少，这里整理一下自己的思路，在整个工具的编写过程中需要不断修正。
-
-总体来说，爬虫分为下面四个部分
-* 模拟登录（这一步不是必须的）
+总体来说，爬虫分为下面三个部分 
 * 获取页面数据
 * 解析页面数据
 * 保存数据
 
-每个步骤都对应了一个类用于处理相关流程的工作
-```js
-let auth = auth.login()
-
-let sp = new Spider({
-    auth,
-    // some spider config
+下面演示了抓取微博热搜排行榜的整体历程
+```ts
+const sp = new Spider({
+  key: 'weibo_hot_search',
+  cache: false, 
+  json: true,
+  async request() {
+    const { data } = await axios.get('https://weibo.com/ajax/side/hotSearch')
+    return data as {
+      data: {
+        realtime: {
+          is_new: number
+          category: string
+          word_scheme: string
+        }[]
+      }
+    }
+  },
+  async parse(data) {
+    // 会自动推断request函数的类型
+    const list = data.data.realtime.filter((row) => row.category?.includes('社会新闻'))
+    return list.map((row) => `https://s.weibo.com/weibo?q=${row.word_scheme.replaceAll('#', '%23')}`)
+  },
+  save(data) {
+    // 会自动推断出parse函数的返回值
+    return saveInFile(resolve(__dirname, './output/weibo.txt'), data)
+  },
 })
-let db = new Db({
-    // some dbEngine config
-})
 
-sp.start().then(data => {
-    db.save(data)
+sp.work()
+```
+下面是抓取某个HTML页面的示例
+```ts
+async function request(url: string) {
+  const res = await http.get(url, {
+    responseType: 'arraybuffer',
+  })
+  return decode(res.data, 'gbk')
+}
+const sp = new Spider({
+  cache: true,
+  key: 'novel',
+  json: false,
+  async request() {
+    const res = await http.get(`${host}index.html`, {
+      responseType: 'arraybuffer',
+    })
+    return decode(res.data, 'gbk') // 可以自定处理编码等问题
+  },
+  async parse(data) {
+    return parseHTMLResponse(data, {
+      articles: {
+        selector: '.uclist dd a',
+        list: true,
+        parse($dom) {
+          const title = $dom.text()
+          const url = $dom.attr('href')
+          return {
+            title,
+            url: `${host}${url}`,
+          }
+        },
+      },
+    })
+  },
+  async save(data) {
+    return saveInFile(resolve(__dirname, './output/2.txt'), data)
+  },
 })
 ```
 
+sp的构造参数包括
+* key: string, 每个爬虫的唯一id，在日志、缓存等地方会使用
+* cache: bool，是否需要缓存原始响应到本地，每次都走网络请求，在测试期间打开可以方便调试
+* json: bool，request响应是否是json，由于涉及到缓存，这里需要手动指定，方便从缓存恢复时符合期望的数据
+* request: () => Promise<R>, 请求函数，R是html字符串或者任何JSON类型
+* parse: (data: R) => Promise<P>，解析内容函数，参数是request的返回值，会自动推断类型
+* save: (data: P) => Promise<void>，保存函数，参数是parse函数的返回值，会自动推断类型
 
-### 模拟登录
+### 获取页面数据
+
 在部分需要获取用户信息的路由中，需要进行用户账号密码登录，后续请求才会携带对应的身份信息。具体实现思路有两种
 * 手动在网站上登录，并直接复制对应的请求返回值，通过配置形式注入
 * 抓包，分析登录请求及返回值，调用登录接口进行登录，建议这种
 
 在其他不需要登录的页面上，这一步不是必须的。
 
-### 获取页面数据
-发送http请求即可，如果需要登录，则需要修改请求头并携带用户身份信息。
-
-node端也有很多不错的请求工具，目前暂时使用的是`axios`
+准备工作完成之后，只需要发送http请求即可获取页面数据。可以选用任何你喜欢的node网络请求工具，这里推荐axios
 
 ### 解析页面数据
-一个基本的`strategy`配置如下
-```js
-{
-        rtype: /www.laifudao.com\/wangwen\/youmoxiaohua/,
-        strategy: [{
-            selector: '.post-article .article-content',
-            parse($dom) {
-                return {
-                    content: $dom.text()
-                }
-            }
-        }]
-    }
-```
-根据http响应，解析html文档，获取对应的dom节点数据。这里使用`cheerio`解析文档，由于不同的页面解析方式不同，此处需要进行策略配置，
-```js
-{
-    rtype: /www.laifudao.com\/wangwen\/youmoxiaohua/,
-    strategy: []
+
+如果是JSON类型的request，则直接处理JSON对象即可。
+
+如果是HTML类型的request，使用[`cherrio`](https://github.com/cheeriojs/cheerio)解析HTML。
+
+cherrio与jQuery的用法基本一致，可以直接在Node.js环境直接运行
+```ts
+async function parse(data: string) {
+  return parseHTMLResponse(data, {
+    articles: {
+      selector: '.uclist dd a',
+      list: true,
+      parse($dom) {
+        const title = $dom.text()
+        const url = $dom.attr('href')
+        return {
+          title,
+          url: `${host}${url}`,
+        }
+      },
+    },
+  })
 }
 ```
-每个页面的`strategy`对象是一个数组，包含选择器和对应选择器匹配节点的解析模式。
-```
-strategy: [{
-    selector: '.article .contentHerf',
-    parse($dom) {
-        // 这里处理对应的数据格式
-        return {
-            content: $dom.text()
-        }
-    },
-}]
-```
-同一个页面可以配置多个策略，最后会将收集到的数据汇总到一起，进行保存
+
+`parseHTMLResponse`接收的是一个html字符串和需要解析的节点策略，内部会依次运行每个配置的parse函数，并将解析结果挂载到返回值的同名key上面。
+
+同一个页面可以配置多个策略，最后会将收集到的数据汇总到一起，进行保存。
 
 ### 保存
-数据的保存有多种方式，暂时支持文件保存和mongodb保存。
 
-文件保存
-```js
-let file = {
-    type: 'file', // 指定存储类型
-    config: {
-        dist: path.resolve(__dirname, './tmp/1.json'),
-        format(data) {
-            return JSON.stringify(data)
-        },
-    },
-}
+数据的保存有多种方式，框架封装了
+
+文件保存`saveInFile`
+
+```ts
+saveInFile(resolve(__dirname, './output/weibo.txt'), data)
 ```
 
-mongodb保存
+mongodb保存, TODO
 ```js
-let mongo = {
-    type: 'mongo',
-    config: {
-        host: 'mongodb://localhost/shymean',
-        document: 'joke',
-        schema: {
-            content: String
+saveInMongoDB(data)
+```
+
+也可以在`save`钩子中自定义处理，比如抓取到了一堆表情包图片，需要下载url保存到本地磁盘上，可以使用内置的`downloadMedia`
+```ts
+async function save(data) {
+  for (const row of data.images) {
+    const filePath = resolve(__dirname, './output/', `${row.name}.jpg`)
+    await downloadMedia(filePath, async () =>
+      axios({
+        method: 'get',
+        url: row.src,
+        responseType: 'stream',
+        headers: {
+          // ....
         },
-    }
+      })
+    )
+  }
 }
 ```
-在`Db`构造函数中，通过`type`指定存储引擎，然后在`config`中传入对应的配置参数即可
-
-## IP代理池
-
-
-爬虫的访问频率一般比较高，除了控制每次请求的间隔之外，还可以使用ip代理进行访问，抹除原始访问记录
-
-参考
-* https://cloud.tencent.com/developer/news/343582
-* https://zhuanlan.zhihu.com/p/31431224
-* [大数据时代，用爬虫拿到数据违法吗？数据可以商业化吗？](https://zhuanlan.zhihu.com/p/66870379)
-
-### ip代理原理
-
-### 使用ip代理
-
-* 直接购买xxx服务，
-* 抓取免费代理，然后自己写校验，提供一个接口给爬虫使用
-
-### 设计ip池
-
-todo
 
 ## 多个页面的爬取流程
+
 多个页面的爬取，不单单是遍历url数组，重复爬取单个页面的数据，还需要考虑下面问题：
 * 检测页面是否重复爬取
 * 控制并发，兼顾效率与安全性
 * 登录信息的过期
 * 自动化
 * 异常处理与进入监控等
+* IP代理
 
 一步一步完善吧~
 

@@ -1,56 +1,34 @@
 import cheerio from 'cheerio'
 
-export type JSONParseStrategy = {
-  json: true,
-  parse: (data: any) => any
-}
-
-export type HTMLParseStrategy = {
-  json: boolean,
-  selector: string,
-  parse: (dom: cheerio.Cheerio, $: cheerio.Root) => any
-}
-
-export type ParseStrategy = JSONParseStrategy | HTMLParseStrategy
-
-export interface UrlStrategyPage {
-  rtype: string | RegExp,
-  strategy: ParseStrategy[]
-}
-
-class UrlStrategy {
-  pages: UrlStrategyPage[]
-
-  constructor(pages: UrlStrategyPage[]) {
-    this.pages = []
-  }
-
-  static match(expected, actual = '') {
-    if (typeof expected === 'string') {
-      return expected.toLowerCase() === actual.toLowerCase()
-    }
-
-    if (expected instanceof RegExp) {
-      return expected.test(actual)
-    }
-  }
-
-  addPage(page: UrlStrategyPage) {
-    this.pages.push(page)
-  }
-
-  // 获取对应url的解析策略
-  getPageStrategy(url) {
-    let pages = this.pages
-    for (let i = 0; i < pages.length; ++i) {
-      let page = pages[i]
-      let {rtype, strategy} = page
-
-      if (UrlStrategy.match(rtype, url)) {
-        return strategy
-      }
-    }
+type HandlerMap = {
+  [key: string]: {
+    selector: string
+    list: boolean // 是否存在多个相同选择器，需要返回列表元素
+    parse: (dom: cheerio.Cheerio, $: cheerio.Root) => any
   }
 }
 
-export default UrlStrategy
+type HandlerResult<T extends HandlerMap> = {
+  [K in keyof T]: T[K]['list'] extends true ? ReturnType<T[K]['parse']>[] : ReturnType<T[K]['parse']>
+}
+
+export function parseHTMLResponse<T extends HandlerMap>(html: string, strategyMap: T): HandlerResult<T> {
+  const $ = cheerio.load(html)
+  const result: Partial<HandlerResult<T>> = {}
+
+  const keys = Object.keys(strategyMap)
+  for (const key of keys) {
+    const strategy = strategyMap[key]
+    const { selector, list, parse } = strategy
+    const $dom = $(selector)
+    const arr: ReturnType<typeof parse>[] = []
+    $dom.each(function () {
+      // @ts-ignore
+      const $this = $(this)
+      const res = parse($this, $)
+      arr.push(res)
+    })
+    result[key as keyof T] = list ? arr : arr[0]
+  }
+  return result as HandlerResult<T>
+}

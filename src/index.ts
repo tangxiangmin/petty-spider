@@ -1,3 +1,5 @@
-export {default as App} from './app'
-export {default as http} from './http'
-export {default as logger, configLogger} from './log'
+export { Spider } from './spider'
+export { parseHTMLResponse } from './strategy'
+export { downloadMedia } from './download'
+export { setGlobalConfig } from './config'
+export { saveInFile, initMongooseInstance, saveInMongoDB, closeMongoDB } from './save'

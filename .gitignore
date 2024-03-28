@@ -1,8 +1,8 @@
 .idea
 node_modules
-tmp
-examples
-logs
+logs/
+caches/
 lib
-src/draft
 docs
+output/
+examples/
